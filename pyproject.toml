@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "focusnoise"
+version = "0.0.1.dev"
+description = "A minimal pink and brown noise player for focused work"
+requires-python = ">=3.9"
+dependencies = ["click", "numpy", "sounddevice"]
+
+[project.scripts]
+focusnoise = "focusnoise:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = ["focusnoise"]
