@@ -2,7 +2,17 @@
 
 > Disclaimer: This script was vibe-coded using gpt-6-luna.
 
-Very simple Python script that help you focusing on noisy environments by playing different types of noise on your computer speaker.
+A very simple Python script that helps you focus in noisy environments by playing different types of noise through your computer speakers.
+
+## Dependencies
+
+FocusNoise uses the following Python packages:
+
+- Click
+- NumPy
+- sounddevice
+
+These dependencies are installed automatically when you install FocusNoise.
 
 ## Installation
 
