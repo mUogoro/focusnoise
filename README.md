@@ -24,17 +24,22 @@ python -m pip install .
 
 ## Launching
 
-Choose the noise type (`pink` or `brown`):
+Choose the noise type (`pink`, `brown`, `blue`, `green`, or `violet`):
 
 ```bash
 focusnoise pink
 ```
 
-Or:
+Other supported types:
 
 ```bash
 focusnoise brown
+focusnoise blue
+focusnoise green
+focusnoise violet
 ```
+
+Green noise is implemented as band-limited noise focused on the mid frequencies.
 
 Set the output volume with `--volume` as an integer percentage from 0 to 100 (default: 100):
 

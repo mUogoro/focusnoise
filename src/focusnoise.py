@@ -1,4 +1,4 @@
-"""Play continuous pink or brown noise through the default audio output."""
+"""Play continuous colored noise through the default audio output."""
 
 import click
 import numpy as np
@@ -43,8 +43,42 @@ def brown_noise(size, state):
     return output
 
 
+def blue_noise(size, state):
+    """Generate blue noise by differentiating white noise."""
+    white = np.random.uniform(-1.0, 1.0, size)
+    samples = np.concatenate(([state[0]], white))
+    state[0] = samples[-1]
+    return np.diff(samples).astype(np.float32) * 0.6
+
+
+def violet_noise(size, state):
+    """Generate violet noise by twice differentiating white noise."""
+    white = np.random.uniform(-1.0, 1.0, size)
+    samples = np.concatenate(([state[0], state[1]], white))
+    state[:] = samples[-2:].tolist()
+    return np.diff(samples, n=2).astype(np.float32) * 0.35
+
+
+def green_noise(size, state):
+    """Generate band-limited noise focused on the mid frequencies."""
+    white = np.random.uniform(-1.0, 1.0, size)
+    output = np.empty(size, dtype=np.float32)
+    previous_input, highpass_value, lowpass_value = state
+    highpass_alpha = SAMPLE_RATE / (SAMPLE_RATE + 2.0 * np.pi * 180.0)
+    lowpass_alpha = 1.0 - np.exp(-2.0 * np.pi * 1800.0 / SAMPLE_RATE)
+
+    for i, sample in enumerate(white):
+        highpass_value = highpass_alpha * (highpass_value + sample - previous_input)
+        previous_input = sample
+        lowpass_value += lowpass_alpha * (highpass_value - lowpass_value)
+        output[i] = lowpass_value * 2.0
+
+    state[:] = [previous_input, highpass_value, lowpass_value]
+    return output
+
+
 @click.command()
-@click.argument("noise", type=click.Choice(("pink", "brown")))
+@click.argument("noise", type=click.Choice(("pink", "brown", "blue", "green", "violet")))
 @click.option(
     "--volume",
     type=click.IntRange(min=0, max=100),
@@ -54,8 +88,15 @@ def brown_noise(size, state):
 )
 def main(noise, volume):
     """Play noise to help mask distractions."""
-    state = [0.0] * (7 if noise == "pink" else 1)
-    generator = pink_noise if noise == "pink" else brown_noise
+    generators = {
+        "pink": (pink_noise, 7),
+        "brown": (brown_noise, 1),
+        "blue": (blue_noise, 1),
+        "green": (green_noise, 3),
+        "violet": (violet_noise, 2),
+    }
+    generator, state_size = generators[noise]
+    state = [0.0] * state_size
 
     try:
         with sd.OutputStream(samplerate=SAMPLE_RATE, channels=1, dtype="float32") as stream:
